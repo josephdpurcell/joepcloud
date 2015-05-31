@@ -5,3 +5,4 @@ export OS_TENANT_NAME=demo
 export OS_USERNAME=demo
 export OS_PASSWORD=pass
 export OS_AUTH_URL=http://node0-controller.joepcloud.local:5000/v3
+export OS_IMAGE_API_VERSION=2

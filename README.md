@@ -25,6 +25,7 @@ To complete this goal, I'm following these instructions:
 * service - a service in this context is an OpenStack service, such as Identity, Image, Compute, Storage, Swift, etc.
 * Keystone - this is a synonym for the Identity service
 * Glance - this is a synonym for the Image service
+* Nova - this is a synonym for the Compute service
 
 ## What is OpenStack?
 
@@ -34,7 +35,7 @@ There are many services to OpenStack, here are key ones:
 
 * Identity - handles users and permissions, and manages a catalog of available services
 * Image - stores server images and provides metadata on those images
-* Compute - ?
+* Compute - manages cloud computing tasks; interacts with Image for getting images and Identity for auth
 
 See the full list of current "OpenStack Capabilities" [here](https://www.openstack.org/software/roadmap/).
 
@@ -42,7 +43,7 @@ See the full list of current "OpenStack Capabilities" [here](https://www.opensta
 
 The joepcloud has the following nodes with their related responsibilities:
 
-* controller - this is the machine that will handle ??
+* controller - this is the machine that will handle Identity and Image services
 * network - ??
 * compute - ??
 
@@ -84,8 +85,8 @@ The joepcloud has the following nodes with their related responsibilities:
 * mysql 5.5
 * rabbitmq 3.5.3
 * python 2.7.6
-* keystone
-* glance
+* keystone (kilo release)
+* glance (kilo release)
 
 ### node2-network
 
@@ -94,6 +95,10 @@ The joepcloud has the following nodes with their related responsibilities:
 ### node2-compute
 
 * ubuntu 14.04
+* mysql 5.5
+* rabbitmq 3.5.3
+* python 2.7.6
+* nova (kilo release)
 
 ## Credentials
 
@@ -112,6 +117,10 @@ mysql
   u: glance
   p: pass
   purpose: the Image service's access for r/w to the db
+
+  u: nova
+  p: pass
+  purpose: the Compute service's access for r/w to the db
 
 rabbitmq
   u: openstack
@@ -133,6 +142,10 @@ keystone:
   u: glance
   p: pass
   purpose: managing disk images with the Image service
+
+  u: nova
+  p: pass
+  purpose: managing taks for the Compute service
 ```
 
 ## TODOs

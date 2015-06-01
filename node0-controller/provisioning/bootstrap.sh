@@ -111,4 +111,45 @@ wget --quiet -P /tmp/images http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-
 glance image-create --name "cirros-0.3.4-x86_64" --file /tmp/images/cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare --visibility public --progress
 rm -r /tmp/images
 
+# Setup Compute service.
+# Note: this is also referred to as Nova.
+# 1. Install nova and dependencies.
+#   a. Setup database.
+SQL="CREATE DATABASE nova;
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'pass';"
+echo $SQL | mysql -u root -ppass
+#   b. Create user and register service.
+source $DIR/keystone/admin-temp-credentials.sh
+openstack user create --password pass nova
+openstack role add --project service --user nova admin
+openstack service create --name nova --description "OpenStack Compute" compute
+# its either this
+openstack endpoint create \
+  --publicurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
+  --internalurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
+  --adminurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
+  --region RegionOne \
+  compute
+# or replace %\(tenant_id\)s with the actual tenant
+#openstack endpoint create \
+#  --publicurl "http://node0-controller.joepcloud.local:8774/v2/default" \
+#  --internalurl "http://node0-controller.joepcloud.local:8774/v2/default" \
+#  --adminurl "http://node0-controller.joepcloud.local:8774/v2/default" \
+#  --region RegionOne \
+#  compute
+# 2. Install compute service.
+DEBIAN_FRONTEND=noninteractive apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
+cp $DIR/nova/nova.conf /etc/nova/nova.conf
+su -s /bin/sh -c "nova-manage db sync" nova
+# Restart services.
+service nova-api restart
+service nova-cert restart
+service nova-consoleauth restart
+service nova-scheduler restart
+service nova-conductor restart
+service nova-novncproxy restart
+# Delete unused sqllite.
+rm -f /var/lib/nova/nova.sqlite
+
 touch /tmp/provisioned

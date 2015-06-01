@@ -124,20 +124,12 @@ source $DIR/keystone/admin-temp-credentials.sh
 openstack user create --password pass nova
 openstack role add --project service --user nova admin
 openstack service create --name nova --description "OpenStack Compute" compute
-# its either this
 openstack endpoint create \
-  --publicurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
-  --internalurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
-  --adminurl "http://node0-controller.joepcloud.local:8774/v2/%\(tenant_id\)s" \
+  --publicurl "http://node0-controller.joepcloud.local:8774/v2/%(tenant_id)s" \
+  --internalurl "http://node0-controller.joepcloud.local:8774/v2/%(tenant_id)s" \
+  --adminurl "http://node0-controller.joepcloud.local:8774/v2/%(tenant_id)s" \
   --region RegionOne \
   compute
-# or replace %\(tenant_id\)s with the actual tenant
-#openstack endpoint create \
-#  --publicurl "http://node0-controller.joepcloud.local:8774/v2/default" \
-#  --internalurl "http://node0-controller.joepcloud.local:8774/v2/default" \
-#  --adminurl "http://node0-controller.joepcloud.local:8774/v2/default" \
-#  --region RegionOne \
-#  compute
 # 2. Install compute service.
 DEBIAN_FRONTEND=noninteractive apt-get -y install nova-api nova-cert nova-conductor nova-consoleauth nova-novncproxy nova-scheduler python-novaclient
 cp $DIR/nova/nova.conf /etc/nova/nova.conf

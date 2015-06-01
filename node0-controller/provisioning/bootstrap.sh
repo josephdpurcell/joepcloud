@@ -144,4 +144,31 @@ service nova-novncproxy restart
 # Delete unused sqllite.
 rm -f /var/lib/nova/nova.sqlite
 
+# Setup Network service.
+# Note: this is also referred to as Neutron.
+# 1. Install nova and dependencies.
+#   a. Setup database.
+SQL="CREATE DATABASE neutron;
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'pass';"
+echo $SQL | mysql -u root -ppass
+#   b. Create user and register service.
+source $DIR/keystone/admin-temp-credentials.sh
+openstack user create --password pass neutron
+openstack role add --project service --user neutron admin
+openstack service create --name neutron --description "OpenStack Networking" network
+openstack endpoint create \
+  --publicurl http://node0-controller.joepcloud.local:9696 \
+  --adminurl http://node0-controller.joepcloud.local:9696 \
+  --internalurl http://node0-controller.joepcloud.local:9696 \
+  --region RegionOne \
+  network
+# 2. Install network service.
+DEBIAN_FRONTEND=noninteractive apt-get -y install neutron-server neutron-plugin-ml2 python-neutronclient
+cp $DIR/neutron/neutron.conf /etc/neutron/neutron.conf
+cp $DIR/neutron/plugins/ml2/ml2_conf.ini /etc/neutron/plugins/ml2/ml2_conf.ini
+su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+service nova-api restart
+service neutron-server restart
+
 touch /tmp/provisioned

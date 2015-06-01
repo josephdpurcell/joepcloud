@@ -19,6 +19,8 @@ To complete this goal, I'm following these instructions:
 1. [Chapter 3. Add the Identity service - Create the service entity and API endpoint](http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-services.html)
 1. [Chapter 3. Add the Identity service - Create projects, users, and roles](http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-services.html)
 1. [Chapter 4. Add the Image service - Install and configure](http://docs.openstack.org/kilo/install-guide/install/apt/content/glance-install.html)
+1. [Chapter 5. Add the Compute service - Install and configure controller node](http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html)
+1. [Chapter 5. Add the Compute service - Install and configure a compute node](http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html)
 
 ## Terminology
 
@@ -43,9 +45,9 @@ See the full list of current "OpenStack Capabilities" [here](https://www.opensta
 
 The joepcloud has the following nodes with their related responsibilities:
 
-* controller - this is the machine that will handle Identity and Image services
+* controller - this is the machine that will handle Identity and Image and Compute services
 * network - ??
-* compute - ??
+* compute - this gets the Compute service also installed
 
 ## Setup
 
@@ -87,18 +89,16 @@ The joepcloud has the following nodes with their related responsibilities:
 * python 2.7.6
 * keystone (kilo release)
 * glance (kilo release)
+* nova api (kilo release)
 
-### node2-network
+### node1-network
 
 * ubuntu 14.04
 
 ### node2-compute
 
 * ubuntu 14.04
-* mysql 5.5
-* rabbitmq 3.5.3
-* python 2.7.6
-* nova (kilo release)
+* nova compute (kilo release)
 
 ## Credentials
 

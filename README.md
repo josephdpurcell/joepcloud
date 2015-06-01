@@ -21,6 +21,10 @@ To complete this goal, I'm following these instructions:
 1. [Chapter 4. Add the Image service - Install and configure](http://docs.openstack.org/kilo/install-guide/install/apt/content/glance-install.html)
 1. [Chapter 5. Add the Compute service - Install and configure controller node](http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html)
 1. [Chapter 5. Add the Compute service - Install and configure a compute node](http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html)
+1. [Chapter 6. Add a networking component - OpenStack Networking (neutron) - Install and configure controller node](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-controller-node.html)
+1. [Chapter 6. Add a networking component - OpenStack Networking (neutron) - Install and configure network node](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-network-node.html)
+Next: neutron agent-list on the controller should show the network node
+Then: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-compute-node.html
 
 ## Terminology
 
@@ -28,6 +32,7 @@ To complete this goal, I'm following these instructions:
 * Keystone - this is a synonym for the Identity service
 * Glance - this is a synonym for the Image service
 * Nova - this is a synonym for the Compute service
+* Neutron - this is a synonym for the Network service
 
 ## What is OpenStack?
 
@@ -38,6 +43,7 @@ There are many services to OpenStack, here are key ones:
 * Identity - handles users and permissions, and manages a catalog of available services
 * Image - stores server images and provides metadata on those images
 * Compute - manages cloud computing tasks; interacts with Image for getting images and Identity for auth
+* Network - manages virtual networking on all nodes
 
 See the full list of current "OpenStack Capabilities" [here](https://www.openstack.org/software/roadmap/).
 
@@ -45,7 +51,7 @@ See the full list of current "OpenStack Capabilities" [here](https://www.opensta
 
 The joepcloud has the following nodes with their related responsibilities:
 
-* controller - this is the machine that will handle Identity and Image and Compute services
+* controller - this is the machine that will handle Identity and Image and Compute and Network services
 * network - ??
 * compute - this gets the Compute service also installed
 
@@ -122,6 +128,10 @@ mysql
   p: pass
   purpose: the Compute service's access for r/w to the db
 
+  u: neutron
+  p: pass
+  purpose: the Network service's access for r/w to the db
+
 rabbitmq
   u: openstack
   p: pass
@@ -146,11 +156,15 @@ keystone:
   u: nova
   p: pass
   purpose: managing taks for the Compute service
+
+  u: neutron
+  p: pass
+  purpose: managing networking config for the Network service
 ```
 
 ## TODOs
 
-1. The very next todo is to make sure keystone is working: [link](http://docs.openstack.org/kilo/install-guide/install/apt/content/keystone-verify.html)
+1. The very next todo is to get neutron working.
 1. Verify that the ntp config is secure / proper. I just trial and error'd until it worked.
 1. Disable or remove any automatic update services because they can impact your OpenStack environment.
 1. Consider using `mysql_secure_installation` in provision script.

@@ -47,8 +47,9 @@ rm -f /var/lib/keystone/keystone.db
 cp $DIR/apache/apache2.conf /etc/apache2/apache2.conf
 cp $DIR/apache/wsgi-keystone.conf /etc/apache2/sites-available/wsgi-keystone.conf
 ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
-mkdir -p /var/www/cgi-bin/keystone
-curl http://git.openstack.org/cgit/openstack/keystone/plain/httpd/keystone.py?h=stable/kilo | tee /var/www/cgi-bin/keystone/main /var/www/cgi-bin/keystone/admin
+cp $DIR/cgi-bin /var/www/cgi-bin
+# @todo rm this line: mkdir -p /var/www/cgi-bin/keystone
+# @todo rm this line: curl http://git.openstack.org/cgit/openstack/keystone/plain/httpd/keystone.py?h=stable/kilo | tee /var/www/cgi-bin/keystone/main /var/www/cgi-bin/keystone/admin
 # Note: this doesn't work inside a vm?
 #chown -R keystone:keystone /var/www/cgi-bin/keystone
 chmod 755 /var/www/cgi-bin/keystone/*

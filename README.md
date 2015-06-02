@@ -160,6 +160,18 @@ keystone:
   u: neutron
   p: pass
   purpose: managing networking config for the Network service
+
+neutron:
+    metadata_agent_shared_secret: luChyijyujofshudjegNevNeatEnyip8
+    purpose: no idea??
+```
+
+### node1-network
+
+```
+neutron:
+    metadata_agent_shared_secret: luChyijyujofshudjegNevNeatEnyip8
+    purpose: no idea??
 ```
 
 ## TODOs

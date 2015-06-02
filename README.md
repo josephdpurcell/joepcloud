@@ -23,8 +23,7 @@ To complete this goal, I'm following these instructions:
 1. [Chapter 5. Add the Compute service - Install and configure a compute node](http://docs.openstack.org/kilo/install-guide/install/apt/content/ch_nova.html)
 1. [Chapter 6. Add a networking component - OpenStack Networking (neutron) - Install and configure controller node](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-controller-node.html)
 1. [Chapter 6. Add a networking component - OpenStack Networking (neutron) - Install and configure network node](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-network-node.html)
-Next: neutron agent-list on the controller should show the network node
-Then: http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-compute-node.html
+1. [Chapter 6. Add a networking component - OpenStack Networking (neutron) - Install and configure compute node](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-compute-node.html)
 
 ## Terminology
 
@@ -69,21 +68,37 @@ The joepcloud has the following nodes with their related responsibilities:
   1. `vagrant ssh node1 -c "ntpq -c assoc" && vagrant ssh node2 -c "ntpq -c assoc"`
     1.  Contents in the condition column should indicate sys.peer.
 1. Verify the controller node has the dependencies needed:
-  1. `vagrant ssh node0 -c "ntpq -c assoc"`
-  1. `mysql -u root -ppass` should allow you to login to mysql
-  1. Ensure the right version of mysql is installed: `vagrant@node0-controller:~$ mysql --version
-  mysql  Ver 14.14 Distrib 5.5.43, for debian-linux-gnu (x86_64) using readline 6.3`
-  1. Ensure the right version of rabbitmq is installed and that it is running: `vagrant@node0-controller:~$ sudo rabbitmqctl status | grep rabbit
-  Status of node 'rabbit@node0-controller' ...
-   {running_applications,[{rabbit,"RabbitMQ","3.5.3"},`
+  1. `vagrant ssh node0 -c "mysql --version"`
+    1. to make sure you have the right version, this should print: `mysql  Ver 14.14 Distrib 5.5.43, for debian-linux-gnu (x86_64) using readline 6.3`
+  1. `vagrant ssh node0 -c "mysql -u root -ppass"`
+    1. you should be allowed to login to mysql
+  1. `vagrant ssh node0 -c "sudo rabbitmqctl status | grep rabbit"`
+    1. to make sure the right version of rabbitmq is running, this should print: `{running_applications,[{rabbit,"RabbitMQ","3.5.3"},`
   1. Ensure that keystone is running properly:
-    1. Get the list of projects: `openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-auth-type password project list`
-    1. Get the list of users: `openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-auth-type password user list`
-    1. Get the list of roles: `openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-auth-type password role list`
-    1. Get the list of services: `openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-auth-type password service list`
-    1. Get an auth token as a guest: `openstack --os-auth-url http://node0-controller.joepcloud.local:5000 --os-project-domain-id default --os-user-domain-id default --os-project-name demo --os-username demo --os-auth-type password token issue`
-    1. Ensure guest has no access to admin functions: `openstack --os-auth-url http://node0-controller.joepcloud.local:5000 --os-project-domain-id default --os-user-domain-id default --os-project-name demo --os-username demo --os-auth-type password user list` (this should fail)
-  1. Ensure glance has the image we setup: `openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-auth-type password image list` should show "cirros-0.3.4-x86_64"
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-password pass --os-auth-type password project list"`
+      1. Should return admin, demo, and service projects
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-password pass --os-auth-type password user list"`
+      1. Should return admin, demo, glance, nova, and neutron users
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-password pass --os-auth-type password role list"`
+      1. Should return admin and user roles
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-password pass --os-auth-type password service list"`
+      1. Should return keystone, glance, nova, and neutron services
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:5000 --os-project-domain-id default --os-user-domain-id default --os-project-name demo --os-username demo --os-password pass --os-auth-type password token issue"`
+      1. Should give you an access token
+    1. `vagrant ssh node0 -c "openstack --os-auth-url http://node0-controller.joepcloud.local:5000 --os-project-domain-id default --os-user-domain-id default --os-project-name demo --os-username demo --os-password pass --os-auth-type password user list"`
+      1. This should fail with `You are not authorized`; this is checking that a user can't do admin actions
+  1. `vagrant ssh -c node0 "openstack --os-auth-url http://node0-controller.joepcloud.local:35357 --os-project-name admin --os-username admin --os-password pass --os-auth-type password image list"`
+    1. This should show "cirros-0.3.4-x86_64"
+  1. `vagrant ssh node0 -c "source /vagrant/node0-controller/provisioning/keystone/admin-openrc.sh && nova service-list"`
+    1. Should list nova-consoleauth, nova-scheduler, nova-cert, and nova-conductor
+  1. `vagrant ssh node0 -c "source /vagrant/node0-controller/provisioning/keystone/admin-openrc.sh && nova endpoints"`
+    1. Should list 3 endpoints for each of nova, neutron, keystone, and glance
+  1. `vagrant ssh node0 -c "source /vagrant/node0-controller/provisioning/keystone/admin-openrc.sh && nova image-list"`
+    1. Should list the "cirros-0.3.4-x86_64" image
+  1. `vagrant ssh node0 -c "source /vagrant/node0-controller/provisioning/keystone/admin-openrc.sh && neutron ext-list"`
+    1. Should list a bunch of stuff as shown in the "[Verify operation](http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron-controller-node.html)" docs
+  1. `vagrant ssh node0 -c "source /vagrant/node0-controller/provisioning/keystone/admin-openrc.sh && neutron agent-list"`
+    1. Should list a neutron-l3-agent, neutron-metadata-agent, neutron-openvswitch-agent, and neutron-dhcp-agent for both node1-network and node2-compute hosts (`@todo confirm this is truly what should be expected`)
 
 ## System Requirements
 
